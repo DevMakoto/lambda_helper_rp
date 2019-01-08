@@ -1,6 +1,6 @@
 {
   "name": "lambda_helper_rp",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "description": "Helpers para los lambdas en Real Plaza Dev",
   "main": "src/index.js",
   "scripts": {
@@ -15,7 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "ajv": "^6.6.2",
-    "ajv-error-messages": "^1.0.2",
+    "ajv-errors": "^1.0.1",
     "http-response-object": "^3.0.1",
     "lodash": "^4.17.11"
   }

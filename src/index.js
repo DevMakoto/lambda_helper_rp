@@ -1,7 +1,10 @@
 const _ = require('lodash');
 const ResponseHttp = require('http-response-object');
 const Ajv = require('ajv');
-const AjvErrors = require('ajv-error-messages');
+const ajv = new Ajv({allErrors: true, jsonPointers: true});
+// Ajv options allErrors and jsonPointers are required
+require('ajv-errors')(ajv /*, {singleError: true} */);
+
 
 module.exports = {
     getValuesForSp: (_data, _values) => {
@@ -31,13 +34,13 @@ const getValuesForSp = (_data, _values) => {
 
 const validateRequest = (_request, _schema) => {
 
-    const validate = new Ajv({useDefaults: true}).compile(_schema);
+    const validate = ajv.compile(_schema);
 
     let request_body = convertStringToJson(_request.body);
 
-    let request_param = convertStringToJson(_request.queryStringParameters);
+    let request_param = _request.queryStringParameters;
 
-    let request_path = convertStringToJson(_request.pathParameters);
+    let request_path = _request.pathParameters;
 
     let request = {};
 
@@ -66,18 +69,22 @@ const convertJsonToString = (json) => {
     return JSON.stringify(json);
 };
 
-const response = (_data, _message, _status, _headers) => {
+const response = (_data, _message, _status, _headers, _errors) => {
 
     let headers = _.merge(_headers, {'Access-Control-Allow-Origin': '*'});
 
     let status = _status || 200;
+
+    let errors = _errors || false;
+
+    let key_data = !errors ? 'data' : 'errors';
 
     let data;
 
     if (_.isNull(_data)) {
         data = null;
     } else {
-        data = {'data': _data};
+        data = {[key_data]: _data};
     }
 
     if (!_.isNull(_message)) {
@@ -96,7 +103,5 @@ const responseError = (_data, _message, _status, _headers) => {
     if (_.isNil(_data))
         return response(null, _message, _status, _headers);
 
-    let data = AjvErrors(_data);
-
-    return response(data, _message, _status, _headers);
+    return response(_data, _message, _status, _headers, true);
 };
